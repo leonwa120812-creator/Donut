@@ -1,0 +1,50 @@
+DONUT CLIENT - So bekommst du die fertige JAR (ohne etwas zu installieren)
+
+Du brauchst nur einen kostenlosen GitHub-Account: https://github.com/signup
+
+1) ZIP entpacken
+   Rechtsklick auf donutclient-projekt.zip -> "Alle extrahieren".
+   Du bekommst einen Ordner "donutclient".
+
+2) Neues Repository anlegen
+   - Auf github.com einloggen
+   - Oben rechts "+" -> "New repository"
+   - Name: donutclient   (Private ist okay)
+   - "Create repository" klicken
+
+3) Dateien hochladen
+   - Auf der neuen Seite den Link "uploading an existing file" klicken
+   - Den INHALT des Ordners "donutclient" ins Browserfenster ziehen
+     (also build.gradle, settings.gradle, gradle.properties, src, .github ...
+      NICHT den Ordner selbst)
+   - Unten "Commit changes" klicken
+
+   WICHTIG: Pruefe danach, ob es im Repository den Ordner ".github" gibt
+   (darin "workflows" und "build.yml"). Falls NICHT:
+   - "Add file" -> "Create new file"
+   - Als Dateiname exakt eintippen:  .github/workflows/build.yml
+   - Den Inhalt der Datei build.yml aus dem entpackten Ordner einfuegen
+   - "Commit changes"
+
+4) Build starten
+   - Oben im Repository auf den Reiter "Actions" klicken
+   - Falls gefragt: "I understand my workflows, go ahead and enable them"
+   - Links "Build DONUT Client" waehlen, rechts "Run workflow" -> "Run workflow"
+   - 2-5 Minuten warten, bis ein gruener Haken erscheint
+
+5) JAR herunterladen
+   - Auf den fertigen Lauf klicken
+   - Ganz unten bei "Artifacts" auf "donutclient-jar" klicken
+   - Es wird eine ZIP geladen. Entpacken -> darin liegt donutclient-1.0.0.jar
+
+6) Installieren
+   - Die JAR in den Mods-Ordner deines NoRisk Clients kopieren
+   - Fabric API muss im NoRisk-Profil vorhanden sein (ist bei Fabric-Profilen
+     meist schon dabei, sonst als Mod dazuladen)
+   - Minecraft 1.21.11 mit Fabric starten, im Spiel Right Shift druecken
+
+WENN DER BUILD ROT WIRD (Rotes Kreuz):
+   - Auf den Lauf klicken, dann auf den Schritt "Mod bauen"
+   - Die Fehlermeldung (Zeilen mit "error:") kopieren und mir schicken
+   - Ich korrigiere den Code, du ersetzt die Dateien im Repository
+     ("Add file" -> "Upload files", gleiche Dateinamen ueberschreiben)

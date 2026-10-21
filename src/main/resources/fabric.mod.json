@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "donutclient",
+  "version": "${version}",
+  "name": "DONUT Client",
+  "description": "Erkundungs-Client: StorageFinder, SpawnerFinder, AutoTotem. GUI mit Right Shift.",
+  "authors": ["DONUT"],
+  "license": "All-Rights-Reserved",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["de.donutclient.DonutClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
