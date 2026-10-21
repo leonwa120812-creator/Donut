@@ -28,9 +28,9 @@ jobs:
           LOADER=$(curl -fsS "https://meta.fabricmc.net/v2/versions/loader" | jq -r '[.[] | select(.stable)][0].version')
           API=$(curl -fsS "https://api.modrinth.com/v2/project/fabric-api/version?game_versions=%5B%22$MC%22%5D&loaders=%5B%22fabric%22%5D" | jq -r '.[0].version_number')
           echo "Yarn: $YARN | Loader: $LOADER | Fabric API: $API"
-          if [ -z "$YARN" ] || [ "$YARN" = "null" ]; then echo "Keine Yarn-Mappings gefunden"; exit 1; fi
-          if [ -z "$LOADER" ] || [ "$LOADER" = "null" ]; then echo "Kein Fabric Loader gefunden"; exit 1; fi
-          if [ -z "$API" ] || [ "$API" = "null" ]; then echo "Keine Fabric API gefunden"; exit 1; fi
+          if [ -z "$YARN" ] || [ "$YARN" = "null" ]; then echo "::error::Keine Yarn-Mappings gefunden"; exit 1; fi
+          if [ -z "$LOADER" ] || [ "$LOADER" = "null" ]; then echo "::error::Kein Fabric Loader gefunden"; exit 1; fi
+          if [ -z "$API" ] || [ "$API" = "null" ]; then echo "::error::Keine Fabric API gefunden"; exit 1; fi
           printf 'org.gradle.jvmargs=-Xmx2G\n' > gradle.properties
           printf 'minecraft_version=%s\n' "$MC" >> gradle.properties
           printf 'yarn_mappings=%s\n' "$YARN" >> gradle.properties
@@ -39,9 +39,19 @@ jobs:
           printf 'mod_version=1.0.0\n' >> gradle.properties
           printf 'maven_group=de.donutclient\n' >> gradle.properties
           printf 'archives_base_name=donutclient\n' >> gradle.properties
+          echo "::notice title=Versionen::Yarn $YARN, Loader $LOADER, API $API"
 
       - name: Mod bauen
-        run: gradle build --no-daemon --stacktrace
+        run: |
+          set +e
+          gradle build --no-daemon --console=plain > build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            MSG=$(grep -E "error:|What went wrong|Could not|Execution failed|Caused by|Unsupported|not found|No matching" build.log | cut -c1-220 | head -20 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Build-Fehler::$MSG"
+          fi
+          tail -60 build.log
+          exit $code
 
       - name: JAR hochladen
         uses: actions/upload-artifact@v4
