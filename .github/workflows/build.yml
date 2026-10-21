@@ -1,0 +1,50 @@
+name: Build DONUT Client
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: current
+
+      - name: Fabric-Versionen fuer 1.21.11 ermitteln
+        run: |
+          set -e
+          MC=1.21.11
+          YARN=$(curl -fsS "https://meta.fabricmc.net/v2/versions/yarn/$MC" | jq -r '.[0].version')
+          LOADER=$(curl -fsS "https://meta.fabricmc.net/v2/versions/loader" | jq -r '[.[] | select(.stable)][0].version')
+          API=$(curl -fsS "https://api.modrinth.com/v2/project/fabric-api/version?game_versions=%5B%22$MC%22%5D&loaders=%5B%22fabric%22%5D" | jq -r '.[0].version_number')
+          echo "Yarn: $YARN | Loader: $LOADER | Fabric API: $API"
+          if [ -z "$YARN" ] || [ "$YARN" = "null" ]; then echo "Keine Yarn-Mappings gefunden"; exit 1; fi
+          if [ -z "$LOADER" ] || [ "$LOADER" = "null" ]; then echo "Kein Fabric Loader gefunden"; exit 1; fi
+          if [ -z "$API" ] || [ "$API" = "null" ]; then echo "Keine Fabric API gefunden"; exit 1; fi
+          printf 'org.gradle.jvmargs=-Xmx2G\n' > gradle.properties
+          printf 'minecraft_version=%s\n' "$MC" >> gradle.properties
+          printf 'yarn_mappings=%s\n' "$YARN" >> gradle.properties
+          printf 'loader_version=%s\n' "$LOADER" >> gradle.properties
+          printf 'fabric_api_version=%s\n' "$API" >> gradle.properties
+          printf 'mod_version=1.0.0\n' >> gradle.properties
+          printf 'maven_group=de.donutclient\n' >> gradle.properties
+          printf 'archives_base_name=donutclient\n' >> gradle.properties
+
+      - name: Mod bauen
+        run: gradle build --no-daemon --stacktrace
+
+      - name: JAR hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: donutclient-jar
+          path: build/libs/*.jar
